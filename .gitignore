@@ -1,0 +1,4 @@
+# Markdown-only repo: override the global *.md and CLAUDE.md excludes
+!*.md
+!CLAUDE.md
+.DS_Store
