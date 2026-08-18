@@ -5,4 +5,4 @@ before any commit or push — no exceptions. No self-certification: the
 implementer's own green suite never counts as done; done requires the
 code-review report with zero unresolved criticals plus the qa pass.
 
-Full doctrine: ~/.claude/CLAUDE.md — Hard guards.
+Full rationale: hard-guards.md in this directory; routing: the Flow graph.

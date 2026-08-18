@@ -1,0 +1,14 @@
+{
+  "name": "claude-config",
+  "owner": {
+    "name": "trungtran"
+  },
+  "description": "Personal doctrine marketplace: the flow plugin",
+  "plugins": [
+    {
+      "name": "flow",
+      "source": "./",
+      "description": "Skills-first working doctrine: the Flow graph, hard guards, rules, and the per-prompt reminder hook"
+    }
+  ]
+}

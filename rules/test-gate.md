@@ -11,4 +11,4 @@
   it. The working floors remain the clean-code skill's (>=90% overall, >=95%
   critical paths); 80% is the never-cross line, not the target.
 
-Full doctrine: ~/.claude/CLAUDE.md — Hard guards. Quality authority: clean-code.
+Full rationale: hard-guards.md in this directory. Quality authority: clean-code.

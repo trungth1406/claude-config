@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-"""Doctrine validation for the skill-flow graph.
+"""Doctrine validation for the skill-flow graph and plugin packaging.
 
 Proves the graph is identical in both carriers (CLAUDE.md mermaid fence,
-flow-reminder.md XML envelope), grammatically sane, and that every node is
-audited: each declared node must appear in NODE_SKILLS and every skill it
-routes to must exist. --self-test mutates copies in a tempdir and asserts
-the checks actually fail. ponytail: grammar-lite line parser, not a full
-mermaid parser -- upgrade to mmdc rendering if GitHub ever renders what
-this passes wrongly.
+flow-reminder.md XML envelope), grammatically sane, every node audited
+against installed skills, and the plugin manifests well-formed with every
+hook file reference resolving. --self-test mutates copies in a tempdir and
+asserts each check actually fails. ponytail: grammar-lite line parser, not
+a full mermaid parser -- upgrade to mmdc rendering if GitHub ever renders
+what this passes wrongly.
 """
+import json
 import re
 import shutil
 import sys
@@ -16,6 +17,12 @@ import tempfile
 from pathlib import Path
 
 SKILLS_DIR = Path.home() / ".claude" / "skills"
+
+PLUGIN_MANIFEST = ".claude-plugin/plugin.json"
+MARKET_MANIFEST = ".claude-plugin/marketplace.json"
+HOOKS_FILE = "hooks/hooks.json"
+CHECKED_PATHS = ("CLAUDE.md", "flow-reminder.md",
+                 PLUGIN_MANIFEST, MARKET_MANIFEST, HOOKS_FILE)
 
 LABEL = r'(?:\["[^"]*"\]|\{"[^"]*"\})'
 NODE_RE = re.compile(rf'^\s*(\w+)({LABEL})\s*$')
@@ -86,7 +93,7 @@ def check_balance(lines):
 def check_grammar(body):
     lines = graph_lines(body)
     if not lines or lines[0].strip() != "flowchart TD":
-        return ["graph: first line must be 'flowchart TD'"]
+        return ["graph: first line must be 'flowchart TD'"], set()
     declared, referenced, errors = classify(lines[1:])
     errors += check_balance(lines[1:])
     errors += [f"graph: node {n!r} used in an edge but never given a label"
@@ -110,43 +117,117 @@ def check_skills(declared):
     return errors
 
 
+def load_json(path):
+    try:
+        return json.loads(path.read_text()), []
+    except FileNotFoundError:
+        return None, [f"{path.name} missing"]
+    except json.JSONDecodeError as exc:
+        return None, [f"{path.name} is not valid JSON: {exc}"]
+
+
+def check_manifests(repo):
+    plugin, errors = load_json(repo / PLUGIN_MANIFEST)
+    market, more = load_json(repo / MARKET_MANIFEST)
+    errors += more
+    entries = (market or {}).get("plugins") or []
+    if plugin is not None and not plugin.get("name"):
+        errors.append("plugin.json needs a non-empty 'name'")
+    if market is not None and (not market.get("name")
+                               or not market.get("owner", {}).get("name")):
+        errors.append("marketplace.json needs 'name' and 'owner.name'")
+    if market is not None and (not entries or not all(
+            p.get("name") and p.get("source") for p in entries)):
+        errors.append("marketplace.json needs plugins with name + source")
+    if plugin is not None and entries and \
+            plugin.get("description") != entries[0].get("description"):
+        errors.append("plugin description drifted between the two manifests")
+    return [f"manifest: {e}" for e in errors]
+
+
+def iter_strings(obj):
+    if isinstance(obj, str):
+        yield obj
+    elif isinstance(obj, dict):
+        for value in obj.values():
+            yield from iter_strings(value)
+    elif isinstance(obj, list):
+        for item in obj:
+            yield from iter_strings(item)
+
+
+def check_hook_refs(repo):
+    hooks, errors = load_json(repo / HOOKS_FILE)
+    if hooks is None:
+        return [f"hooks: {e}" for e in errors]
+    refs = [ref for text in iter_strings(hooks)
+            for ref in re.findall(r'\$\{CLAUDE_PLUGIN_ROOT\}/([^"\s]+)', text)]
+    problems = [f"referenced file {ref!r} does not exist in repo"
+                for ref in refs if not (repo / ref).exists()]
+    if not refs:
+        problems.append("hooks.json references no ${CLAUDE_PLUGIN_ROOT} files")
+    return [f"hooks: {p}" for p in problems]
+
+
+def check_reminder(repo):
+    try:
+        text = (repo / "flow-reminder.md").read_text()
+    except FileNotFoundError:
+        return ["reminder: flow-reminder.md missing"]
+    if "flowchart TD" in text or "<skill-flow-graph>" in text:
+        return ["reminder: must stay a slim ping — the graph lives only in CLAUDE.md"]
+    return []
+
+
 def validate(repo):
     claude, errors = extract(repo / "CLAUDE.md", ("```mermaid\n", "```"))
-    reminder, err2 = extract(
-        repo / "flow-reminder.md", ("<skill-flow-graph>\n", "</skill-flow-graph>"))
-    errors += err2
-    if claude is None or reminder is None:
-        return errors
-    if claude != reminder:
-        errors.append("identity: CLAUDE.md and flow-reminder graph bodies differ")
+    packaging = check_reminder(repo) + check_manifests(repo) + check_hook_refs(repo)
+    if claude is None:
+        return errors + packaging
     grammar_errors, declared = check_grammar(claude)
-    return errors + grammar_errors + check_skills(declared)
+    return errors + grammar_errors + check_skills(declared) + packaging
+
+
+def mutated(repo, transform):
+    tmp = Path(tempfile.mkdtemp())
+    for rel in CHECKED_PATHS:
+        dst = tmp / rel
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(repo / rel, dst)
+    transform(tmp)
+    found = validate(tmp)
+    shutil.rmtree(tmp)
+    return found
+
+
+MUTATIONS = (
+    ("reminder regrowing a graph", ("reminder",),
+     lambda t: (t / "flow-reminder.md").write_text(
+         (t / "flow-reminder.md").read_text() + "\nflowchart TD\n")),
+    ("deleted node declaration", ("never given a label", "audit"),
+     lambda t: (t / "CLAUDE.md").write_text(
+         "\n".join(l for l in (t / "CLAUDE.md").read_text().splitlines()
+                   if "Quest[" not in l))),
+    ("nameless plugin.json", ("manifest",),
+     lambda t: (t / PLUGIN_MANIFEST).write_text('{"description": "no name"}')),
+    ("plugin-less marketplace", ("manifest",),
+     lambda t: (t / MARKET_MANIFEST).write_text(
+         '{"name": "m", "owner": {"name": "o"}}')),
+    ("dangling hook reference", ("hooks",),
+     lambda t: (t / HOOKS_FILE).write_text(json.dumps({"hooks": {
+         "UserPromptSubmit": [{"hooks": [{"type": "command",
+             "command": "cat \"${CLAUDE_PLUGIN_ROOT}/missing.md\""}]}]}}))),
+)
 
 
 def self_test(repo):
-    def mutated(transform):
-        tmp = Path(tempfile.mkdtemp())
-        for name in ("CLAUDE.md", "flow-reminder.md"):
-            shutil.copy(repo / name, tmp / name)
-        transform(tmp)
-        found = validate(tmp)
-        shutil.rmtree(tmp)
-        return found
-
-    failures = []
-    if validate(repo):
-        failures.append("self-test: pristine repo should validate clean")
-    identity = mutated(lambda t: (t / "flow-reminder.md").write_text(
-        (t / "flow-reminder.md").read_text().replace("user clear", "user cleared", 1)))
-    if not any("identity" in e for e in identity):
-        failures.append("self-test: carrier divergence went undetected")
-    dropped = mutated(lambda t: (t / "CLAUDE.md").write_text(
-        "\n".join(l for l in (t / "CLAUDE.md").read_text().splitlines()
-                  if "Quest[" not in l)))
-    if not any("never given a label" in e for e in dropped):
-        failures.append("self-test: deleted node declaration went undetected")
-    if not any("audit" in e for e in dropped):
-        failures.append("self-test: audit map did not flag the missing node")
+    failures = ["self-test: pristine repo should validate clean"] \
+        if validate(repo) else []
+    for name, expected, transform in MUTATIONS:
+        found = mutated(repo, transform)
+        for token in expected:
+            if not any(token in e for e in found):
+                failures.append(f"self-test: {name} went undetected ({token})")
     return failures
 
 

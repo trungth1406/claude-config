@@ -1,0 +1,8 @@
+{
+  "name": "flow",
+  "description": "Skills-first working doctrine: the Flow graph, hard guards, rules, and the per-prompt reminder hook",
+  "author": {
+    "name": "trungtran"
+  },
+  "repository": "https://github.com/trungth1406/claude-config"
+}
