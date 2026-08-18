@@ -8,42 +8,54 @@ from there and is never restated here.
 
 # The Flow
 
-## Entry — clarity first
+```mermaid
+flowchart TD
+    %% Routing only. Rationale, thresholds, and authority live in prose.
+    Entry{"requirements clear?"}
+    Entry -- "no" --> Grill["grill-me: attack the plan until it is sharp"]
+    Entry -- "yes" --> Scope{"work scope?"}
 
-Requirements or specs unclear in any way → `grill-me` (or the `grilling`
-primitive). An unattacked idea proceeds no further.
+    Grill -- "user still not confident" --> Quest["to-questionnaire: open questions become a questionnaire"]
+    Quest --> Research["research + find-docs: dedicated agent resolves the open questions"]
+    Research -- "findings cleared by user" --> Entry
+    Research -- "not cleared" --> Grill
+    Grill -- "user clear" --> Scope
 
-After the grill:
+    Scope -- "architecture (any design question, however small)" --> Proto["prototype: throwaway build answers the design question"]
+    Proto --> Design["codebase-design + domain-modeling + design-an-interface: deep modules in ubiquitous-language terms, plus the language best-practice skill"]
+    Design --> Spec["to-spec: synthesize the spec"]
+    Spec --> Tickets["to-tickets: tracer-bullet tickets with blocking edges"]
 
-**#1 — user not yet confident.** Run another grilling round or `to-questionnaire`.
-Then spawn a dedicated agent (using the project's chosen agent protocol, below)
-that works the open questions with `research` + `find-docs` and brings the
-findings back for the user's clearance. Loop until clear.
+    Scope -- "bug" --> Debug["systematic-debugging / diagnosing-bugs: confirm the hypothesis before any fix"]
+    Debug -- "hypothesis confirmed" --> Tickets
 
-**#2 — user is clear.** Route by scope:
+    Scope -- "refactor" --> RevFirst["code-review: judge current code against clean-code"]
+    RevFirst --> Improve["improve-codebase-architecture: find deepening opportunities"]
+    Improve --> RefPlan["request-refactor-plan: tiny-commit refactor plan"]
+    RefPlan -- "anything unclear" --> Entry
+    RefPlan -- "clear" --> Tickets
 
-- **Architecture** (any design question, however small) → `prototype` the flow
-  first, then **always** `codebase-design` + `domain-modeling` +
-  `design-an-interface`, all under `ubiquitous-language` terms. Also invoke the
-  language-specific best-practice skill if one exists (e.g. `rust-best-practices`,
-  `golang-pro`, `typescript-pro`). **Always** finish with `to-spec` +
-  `to-tickets` — even the smallest design change, because one small change can
-  affect the architecture.
-- **Bugs** → `systematic-debugging` and/or `diagnosing-bugs`. Never fix ahead
-  of a confirmed hypothesis.
-- **Refactor** → `code-review` first, then `improve-codebase-architecture`,
-  then `request-refactor-plan` — all judged against `clean-code`. Feed anything
-  unclear back through #1/#2.
-- **Testing** → `tdd` first, always. Then raise coverage to the `clean-code`
-  floors (≥90% overall, ≥95% critical paths) with integration and e2e tests.
-  Never skip `qa`.
+    Scope -- "testing" --> TDD["tdd: red-green-refactor first, coverage to clean-code floors"]
+    TDD --> Tickets
 
-**#3 — loop.** #1 and #2 repeat until the problem is solved, unless the user
-explicitly defers.
+    Tickets -- "GATE: spec + tickets exist (no tickets, no work)" --> Impl["implement: build what the tickets say, tests in the same commit"]
+    Impl -- "a test fails unexpectedly" --> Debug
+    Impl -- "built" --> Review["code-review: independent report, zero unresolved criticals"]
+    Review -- "criticals found" --> Impl
+    Review -- "clean" --> QA["qa: independent pass, bugs become defect tickets"]
+    QA -- "bugs found" --> Tickets
+    QA -- "pass" --> TestGate{"suite green, coverage >= 80 percent, no untested code?"}
+    TestGate -- "no: BLOCKED" --> Impl
+    TestGate -- "yes" --> Commit["commit / push allowed"]
+    Commit -- "more work remains" --> Entry
 
-**#7 — implement.** `implement` is the final skill, fired only when spec and
-tickets exist and the path is clear. After `implement` completes, **always**
-run `code-review` then `qa` before any commit or push — no exceptions.
+    Ask["(from anywhere) user asks for explanation or how-would-the-agent-do-it"] --> Discuss
+    Discuss["discussion: route each question to its best skill -- teach, research + find-docs, graphify, docs tools; a user-named skill always wins"]
+    Discuss -- "more questions" --> Discuss
+    Discuss -- "settled: concise clearance, user confirms" --> Drift{"open spec/tickets still match the discussion outcome?"}
+    Drift -- "no: drifted -- update spec + tickets" --> Spec
+    Drift -- "yes" --> Entry
+```
 
 ## Hard guards
 
@@ -76,10 +88,10 @@ run `code-review` then `qa` before any commit or push — no exceptions.
 
 # Agent protocol — pick once per project
 
-Before the first agent-spawning moment in a project (e.g. the #1 research
-loop): discover the available coordination mechanisms (Agent subagents,
-agent-teams, Workflow, MCP servers like NATS/planboard, tmux fleets — whatever
-this environment actually has), list them to the user, and let the user pick.
+Before the first agent-spawning moment in a project (e.g. the research loop):
+discover the available coordination mechanisms (Agent subagents, agent-teams,
+Workflow, MCP servers like NATS/planboard, tmux fleets — whatever this
+environment actually has), list them to the user, and let the user pick.
 Record the choice (project CLAUDE.md or memory) and reuse it; re-ask only when
 the toolset changes. This applies to user↔agent and agent↔agent work alike.
 
