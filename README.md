@@ -46,6 +46,33 @@ Wire the per-prompt reminder hook into `~/.claude/settings.json`:
 
 `CLAUDE.md` and `rules/*.md` load automatically; only the hook needs wiring.
 
+## Install graphify
+
+The graphify rule assumes the CLI, its skill, and the MCP server exist:
+
+```sh
+uv tool install graphifyy           # package name has the double y;
+                                    # installs graphify + graphify-mcp on PATH
+graphify install --platform claude  # copies the skill into ~/.claude/skills/
+```
+
+Per project, register the MCP server in the repo's `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "graphify": {
+      "command": "graphify-mcp",
+      "args": ["graphify-out/graph.json"],
+      "description": "Code knowledge graph — 10 query tools, token-budgeted"
+    }
+  }
+}
+```
+
+Then build the graph once with `/graphify` (or `graphify update .`); the git
+hooks it installs keep the graph fresh on commit.
+
 ## Sync
 
 Live files are the source of truth; this repo is the mirror.
