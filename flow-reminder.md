@@ -4,7 +4,7 @@
 - NEVER skip /to-tickets. Every task gets tickets before implementation begins.
 - Ticket ready -> ALWAYS /implement, then ALWAYS /code-review + /qa before any commit or push. No exceptions.
 - MUST USE graphify (query / path / explain) for any codebase, architecture, or component-relationship question whenever a graph exists (graphify-out/). Grep/Glob is the LAST resort there, never the first move.
-- MUST USE the docs MCP tools (find-docs / ctx7 / context7) for any library, framework, SDK, or API lookup -- never answer from memory, never grep node_modules.
+- MUST USE /research + docs tools (find-docs / ctx7 / context7) whenever ANYTHING is blurry, unclear, or unknown -- libraries, concepts, domain facts, best practices. Never guess, never answer from memory, never grep node_modules.
 - Quality authority: the clean-code skill. HARD GUARD: never commit or push with failing tests.
 - HARD GUARD: /code-review + /qa is ALWAYS a must before any code push or commit.
 - HARD GUARD: code without tests never commits or pushes. Failing test -> debug first; confirmed logic bug -> defect ticket via /to-tickets, fix the code, never bend the test. Coverage hard floor 80% (clean-code floors 90/95 stay the target).

@@ -87,4 +87,5 @@ the toolset changes. This applies to user↔agent and agent↔agent work alike.
 
 Standalone directives live in `~/.claude/rules/` and inject every session
 alongside this file: code-style, docs-routing (obsidian-vault), graphify
-(second brain), teaching, ticket-gate, review-qa-gate, test-gate, context7.
+(second brain), teaching, ticket-gate, review-qa-gate, test-gate,
+research-first, context7.
