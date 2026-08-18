@@ -2,3 +2,4 @@
 !*.md
 !CLAUDE.md
 .DS_Store
+graphify-out/
