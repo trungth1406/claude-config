@@ -19,12 +19,22 @@ no permissions, no machine state).
   - `teaching.md` — teach skill's interactive-HTML standard
   - `context7.md` — ctx7 CLI for all library/framework docs lookups
 - `flow-reminder.md` — condensed flow, injected on every prompt via hook.
+- `rules-optional/` — context-specific rules, NOT installed by default and
+  deliberately not active on the authoring machine; copy individually where
+  they apply (e.g. work machines):
+  - `spring-dependencies.md` — Spring projects: standard libs over hand-rolling
+  - `git-procedure.md` — never push; short commits, no co-author; one logical
+    change per commit
 
 ## Install on a new machine
 
 ```sh
 cp CLAUDE.md flow-reminder.md ~/.claude/
 mkdir -p ~/.claude/rules && cp rules/*.md ~/.claude/rules/
+
+# per-context extras (work machines etc.), pick individually:
+# cp rules-optional/git-procedure.md ~/.claude/rules/
+# cp rules-optional/spring-dependencies.md ~/.claude/rules/
 ```
 
 Wire the per-prompt reminder hook into `~/.claude/settings.json`:
