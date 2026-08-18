@@ -11,4 +11,4 @@ research tools is a MUST, never optional:
 - WebSearch / WebFetch back these up when primary docs are not enough.
 
 Guessing where these tools apply is a violation. Applies to every agent,
-main or spawned. Full flow: ~/.claude/CLAUDE.md — The Flow #1.
+main or spawned. Full flow: ~/.claude/CLAUDE.md — The Flow's research loop.

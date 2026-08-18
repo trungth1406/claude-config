@@ -18,7 +18,13 @@ no permissions, no machine state).
   - `graphify.md` — second brain: code graph, wikilinks, MCP querying
   - `teaching.md` — teach skill's interactive-HTML standard
   - `context7.md` — ctx7 CLI for all library/framework docs lookups
-- `flow-reminder.md` — condensed flow, injected on every prompt via hook.
+- `flow-reminder.md` — the flow graph + guard lines, injected on every prompt
+  via hook; its graph body must stay identical to CLAUDE.md's.
+- `validate.py` — the repo's test seam: carrier identity, graph grammar,
+  node-to-skill audit. Run `./validate.py && ./validate.py --self-test`
+  before committing any doctrine change.
+- `research/` — versioned evidence behind doctrine decisions (in-repo by
+  documented exception to the vault rule).
 - `rules-optional/` — context-specific rules, NOT installed by default and
   deliberately not active on the authoring machine; copy individually where
   they apply (e.g. work machines):

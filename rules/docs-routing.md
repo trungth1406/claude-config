@@ -9,3 +9,6 @@ All docs go through the `obsidian-vault` skill. Two tiers:
   folder is a stale stub. Confirm the exact vault per project.
 
 A skill's own report artifact keeps its format but lands in the project vault.
+
+Exception: the claude-config doctrine repo keeps research/ in-repo — the
+doctrine's evidence is versioned with the doctrine it justified.
