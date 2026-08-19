@@ -9,6 +9,17 @@
           }
         ]
       }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c 'if [ -f \"${CLAUDE_PLUGIN_ROOT}/scripts/guard-commit.py\" ]; then exec python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/guard-commit.py\"; fi'"
+          }
+        ]
+      }
     ]
   }
 }

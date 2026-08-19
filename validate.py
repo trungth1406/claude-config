@@ -12,6 +12,7 @@ what this passes wrongly.
 import json
 import re
 import shutil
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -21,7 +22,7 @@ SKILLS_DIR = Path.home() / ".claude" / "skills"
 PLUGIN_MANIFEST = ".claude-plugin/plugin.json"
 MARKET_MANIFEST = ".claude-plugin/marketplace.json"
 HOOKS_FILE = "hooks/hooks.json"
-CHECKED_PATHS = ("CLAUDE.md", "flow-reminder.md",
+CHECKED_PATHS = ("CLAUDE.md", "flow-reminder.md", "scripts/guard-commit.py",
                  PLUGIN_MANIFEST, MARKET_MANIFEST, HOOKS_FILE)
 
 LABEL = r'(?:\["[^"]*"\]|\{"[^"]*"\})'
@@ -179,9 +180,36 @@ def check_reminder(repo):
     return []
 
 
+def run_guard(script, command):
+    payload = json.dumps({"tool_name": "Bash", "tool_input": {"command": command}})
+    return subprocess.run([sys.executable, str(script)], input=payload,
+                          capture_output=True, text=True).returncode
+
+
+def check_guard(repo):
+    script = repo / "scripts" / "guard-commit.py"
+    if not script.exists():
+        return ["guard: scripts/guard-commit.py missing"]
+    cases = (('git commit -m "x" -m "Co-authored-by: Claude <c@anthropic.com>"',
+              2, "Co-authored-by not blocked"),
+             ('git commit -m "x" -m "Claude-Session: https://claude.ai/x"',
+              2, "Claude-Session not blocked"),
+             ('git commit -m "Generated with Claude Code"',
+              2, "Generated-with not blocked"),
+             ('git commit -m "see claude.ai for details"',
+              2, "claude.ai link not blocked"),
+             ('git commit -m "done \U0001F916"', 2, "robot emoji not blocked"),
+             ('git commit -m "fix: tighten parser bounds"', 0,
+              "clean commit wrongly blocked"),
+             ("ls -la", 0, "non-commit command wrongly blocked"))
+    return [f"guard: {msg}" for cmd, expected, msg in cases
+            if run_guard(script, cmd) != expected]
+
+
 def validate(repo):
     claude, errors = extract(repo / "CLAUDE.md", ("```mermaid\n", "```"))
-    packaging = check_reminder(repo) + check_manifests(repo) + check_hook_refs(repo)
+    packaging = (check_reminder(repo) + check_manifests(repo)
+                 + check_hook_refs(repo) + check_guard(repo))
     if claude is None:
         return errors + packaging
     grammar_errors, declared = check_grammar(claude)
@@ -217,6 +245,10 @@ MUTATIONS = (
      lambda t: (t / HOOKS_FILE).write_text(json.dumps({"hooks": {
          "UserPromptSubmit": [{"hooks": [{"type": "command",
              "command": "cat \"${CLAUDE_PLUGIN_ROOT}/missing.md\""}]}]}}))),
+    ("neutered commit guard", ("guard",),
+     lambda t: (t / "scripts/guard-commit.py").write_text(
+         (t / "scripts/guard-commit.py").read_text()
+         .replace("sys.exit(2)", "sys.exit(0)"))),
 )
 
 
