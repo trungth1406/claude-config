@@ -61,22 +61,14 @@ present, remove it or every prompt gets the reminder twice.
 
 ## Updating
 
-`/flow:sync` installs the updater at `~/.claude/flow-update.sh`. To update
-any machine:
-
 ```sh
-bash ~/.claude/flow-update.sh
+claude plugin marketplace update claude-config
+claude plugin update flow@claude-config
 ```
 
-It refreshes the marketplace, updates the plugin, and syncs the payload
-into ~/.claude — no credentials involved. Restart Claude Code afterwards
-to apply hook changes.
-
-Bootstrap on a machine that predates the script (one time):
-
-```sh
-bash <(curl -s https://raw.githubusercontent.com/trungth1406/claude-config/main/scripts/update.sh)
-```
+Restart Claude Code, then run `/flow:sync` to converge the live files.
+No credentials involved. (The daily background refresh also picks updates
+up on its own.)
 
 ## Install (manual — fallback)
 

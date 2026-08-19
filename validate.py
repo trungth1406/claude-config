@@ -23,8 +23,7 @@ PLUGIN_MANIFEST = ".claude-plugin/plugin.json"
 MARKET_MANIFEST = ".claude-plugin/marketplace.json"
 HOOKS_FILE = "hooks/hooks.json"
 CHECKED_PATHS = ("CLAUDE.md", "flow-reminder.md", "scripts/guard-commit.py",
-                 "scripts/update.sh", PLUGIN_MANIFEST, MARKET_MANIFEST,
-                 HOOKS_FILE)
+                 PLUGIN_MANIFEST, MARKET_MANIFEST, HOOKS_FILE)
 
 LABEL = r'(?:\["[^"]*"\]|\{"[^"]*"\})'
 NODE_RE = re.compile(rf'^\s*(\w+)({LABEL})\s*$')
@@ -207,18 +206,10 @@ def check_guard(repo):
             if run_guard(script, cmd) != expected]
 
 
-def check_scripts(repo):
-    return [f"script: {path.name} fails bash -n syntax check"
-            for path in sorted(repo.glob("scripts/*.sh"))
-            if subprocess.run(["bash", "-n", str(path)],
-                              capture_output=True).returncode != 0]
-
-
 def validate(repo):
     claude, errors = extract(repo / "CLAUDE.md", ("```mermaid\n", "```"))
     packaging = (check_reminder(repo) + check_manifests(repo)
-                 + check_hook_refs(repo) + check_guard(repo)
-                 + check_scripts(repo))
+                 + check_hook_refs(repo) + check_guard(repo))
     if claude is None:
         return errors + packaging
     grammar_errors, declared = check_grammar(claude)
@@ -258,9 +249,6 @@ MUTATIONS = (
      lambda t: (t / "scripts/guard-commit.py").write_text(
          (t / "scripts/guard-commit.py").read_text()
          .replace("sys.exit(2)", "sys.exit(0)"))),
-    ("broken updater syntax", ("script",),
-     lambda t: (t / "scripts/update.sh").write_text(
-         (t / "scripts/update.sh").read_text() + "\nfi\n")),
 )
 
 
