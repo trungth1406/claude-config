@@ -1,15 +1,5 @@
 {
   "hooks": {
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "sh -c 'cp \"${CLAUDE_PLUGIN_ROOT}/CLAUDE.md\" \"$HOME/.claude/CLAUDE.md\"; mkdir -p \"$HOME/.claude/rules\" && cp \"${CLAUDE_PLUGIN_ROOT}/rules/\"*.md \"$HOME/.claude/rules/\"; mkdir -p \"$HOME/.claude/skills\" && cp -R \"${CLAUDE_PLUGIN_ROOT}/bundled-skills/.\" \"$HOME/.claude/skills/\"' 2>/dev/null || true"
-          }
-        ]
-      }
-    ],
     "UserPromptSubmit": [
       {
         "hooks": [

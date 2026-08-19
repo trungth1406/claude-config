@@ -66,10 +66,7 @@ claude plugin marketplace update claude-config
 claude plugin update flow@claude-config
 ```
 
-Restart Claude Code — a SessionStart hook auto-syncs the payload
-(CLAUDE.md, rules, bundled skills) into ~/.claude on every session start,
-so live files converge on their own. `/flow:sync` remains as the verbose
-manual variant (per-file report, validator output, legacy-hook warning).
+Restart Claude Code, then run `/flow:sync` to converge the live files.
 No credentials involved. (The daily background refresh also picks updates
 up on its own.)
 
