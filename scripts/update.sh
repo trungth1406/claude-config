@@ -1,24 +1,8 @@
 #!/usr/bin/env bash
-# flow-update: one-shot plugin update with a transient GitHub token.
-# Usage: GH_TOKEN=github_pat_xxx bash flow-update.sh   (or run bare and
-# paste the token at the hidden prompt). The token lives only in this
-# process's environment - nothing is stored, nothing to log out.
+# flow-update: one-shot plugin update. Public repo - no credentials needed.
 set -euo pipefail
 
-if [ -z "${GH_TOKEN:-}" ]; then
-  read -rsp "GitHub token (hidden; Enter to use this machine's stored git credentials): " GH_TOKEN
-  echo
-  if [ -n "$GH_TOKEN" ]; then
-    export GH_TOKEN
-  else
-    unset GH_TOKEN
-  fi
-fi
-
-command -v gh >/dev/null || { echo "gh CLI is required" >&2; exit 1; }
 command -v claude >/dev/null || { echo "claude CLI is required" >&2; exit 1; }
-
-gh auth setup-git >/dev/null 2>&1 || true
 
 claude plugin marketplace update claude-config
 claude plugin update flow@claude-config
@@ -40,5 +24,4 @@ cp "${CACHE}scripts/update.sh" "$HOME/.claude/flow-update.sh"
 python3 "${CACHE}validate.py" || \
   echo "validator reported issues above - missing skills? run /setup-matt-pocock-skills"
 
-unset GH_TOKEN
 echo "Done. Restart Claude Code to apply updated hooks."

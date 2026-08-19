@@ -59,33 +59,23 @@ CLAUDE.md files the sync writes. The flow-reminder hook itself ships with
 the plugin (no settings.json wiring); if a legacy manual hook is still
 present, remove it or every prompt gets the reminder twice.
 
-Private-repo note: the marketplace fetches via git clone with your existing
-SSH/HTTPS credentials, but the daily background refresh disables credential
-helpers and can fail silently (the marketplace then reads as stale). Set
-`CLAUDE_CODE_PLUGIN_KEEP_MARKETPLACE_ON_FAILURE=1` in the settings `env`.
+## Updating
 
-## Updating (no stored credentials)
-
-`/flow:sync` installs the updater at `~/.claude/flow-update.sh`. To update a
-machine, mint a short-lived fine-grained token (repo-only, Contents:
-Read-only) and run:
+`/flow:sync` installs the updater at `~/.claude/flow-update.sh`. To update
+any machine:
 
 ```sh
-GH_TOKEN=github_pat_xxx bash ~/.claude/flow-update.sh
+bash ~/.claude/flow-update.sh
 ```
 
-or run it bare and paste the token at the hidden prompt. It refreshes the
-marketplace, updates the plugin, syncs the payload into ~/.claude, and the
-token evaporates with the shell — nothing stored, no logout. Restart Claude
-Code afterwards to apply hook changes.
+It refreshes the marketplace, updates the plugin, and syncs the payload
+into ~/.claude — no credentials involved. Restart Claude Code afterwards
+to apply hook changes.
 
 Bootstrap on a machine that predates the script (one time):
 
 ```sh
-GH_TOKEN=github_pat_xxx bash -c 'curl -sH "Authorization: Bearer $GH_TOKEN" \
-  -H "Accept: application/vnd.github.raw" \
-  https://api.github.com/repos/trungth1406/claude-config/contents/scripts/update.sh \
-  | bash'
+bash <(curl -s https://raw.githubusercontent.com/trungth1406/claude-config/main/scripts/update.sh)
 ```
 
 ## Install (manual — fallback)
