@@ -5,9 +5,9 @@ Proves the graph is identical in both carriers (CLAUDE.md mermaid fence,
 flow-reminder.md XML envelope), grammatically sane, every node audited
 against installed skills, and the plugin manifests well-formed with every
 hook file reference resolving. --self-test mutates copies in a tempdir and
-asserts each check actually fails. ponytail: grammar-lite line parser, not
-a full mermaid parser -- upgrade to mmdc rendering if GitHub ever renders
-what this passes wrongly.
+asserts each check actually fails. Deliberate ceiling: grammar-lite line
+parser, not a full mermaid parser -- upgrade to mmdc rendering if GitHub
+ever renders what this passes wrongly.
 """
 import json
 import re

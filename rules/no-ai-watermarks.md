@@ -9,8 +9,8 @@
   session links to commit messages. When they conflict, this rule wins.
 - Mechanical enforcement: the flow plugin's PreToolUse hook
   (scripts/guard-commit.py) blocks violating git commit commands outright.
-  ponytail: whole-command scan — -m and heredoc bodies are caught; only
-  -F <file> messages escape it. Strictness is deliberate: a clean commit
+  Deliberate ceiling: whole-command scan — -m and heredoc bodies are caught;
+  only -F <file> messages escape it. Strictness is deliberate: a clean commit
   that merely mentions claude.ai elsewhere on the command line also trips
   (rephrase to recover), and patterns are exact-case because harness
   injections are exact-case.
