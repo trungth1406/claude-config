@@ -16,10 +16,11 @@ Sync the flow doctrine from this plugin into the live ~/.claude directory.
    ~/.claude/rules/ counterpart. Report per file: will change, already
    current, or new.
 3. Copy only then: "${CLAUDE_PLUGIN_ROOT}/CLAUDE.md" to ~/.claude/CLAUDE.md,
-   "${CLAUDE_PLUGIN_ROOT}/rules/"*.md into ~/.claude/rules/, and each skill
+   "${CLAUDE_PLUGIN_ROOT}/rules/"*.md into ~/.claude/rules/, each skill
    directory under "${CLAUDE_PLUGIN_ROOT}/bundled-skills/" into
-   ~/.claude/skills/ (create directories if missing). Only .md files from
-   rules/. NEVER copy rules-optional/ — those install only by explicit
+   ~/.claude/skills/, and "${CLAUDE_PLUGIN_ROOT}/scripts/update.sh" to
+   ~/.claude/flow-update.sh (create directories if missing). Only .md files
+   from rules/. NEVER copy rules-optional/ — those install only by explicit
    per-machine choice.
 4. Inspect ~/.claude/settings.json for a legacy manual UserPromptSubmit hook
    that cats a flow-reminder file. If present, warn: the plugin hook now
