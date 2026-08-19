@@ -6,9 +6,13 @@
 set -euo pipefail
 
 if [ -z "${GH_TOKEN:-}" ]; then
-  read -rsp "GitHub token (input hidden): " GH_TOKEN
+  read -rsp "GitHub token (hidden; Enter to use this machine's stored git credentials): " GH_TOKEN
   echo
-  export GH_TOKEN
+  if [ -n "$GH_TOKEN" ]; then
+    export GH_TOKEN
+  else
+    unset GH_TOKEN
+  fi
 fi
 
 command -v gh >/dev/null || { echo "gh CLI is required" >&2; exit 1; }
