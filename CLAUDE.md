@@ -46,7 +46,7 @@ flowchart TD
     QA -- "bugs found" --> Tickets
     QA -- "pass" --> TestGate{"suite green, coverage >= 80 percent, no untested code?"}
     TestGate -- "no: BLOCKED" --> Impl
-    TestGate -- "yes" --> Commit["commit / push allowed"]
+    TestGate -- "yes" --> Commit["commit allowed -- ticket work: branch + worktree, lands via owner-merged PR"]
     Commit -- "more work remains" --> Entry
 
     Ask["(from anywhere) user asks for explanation or how-would-the-agent-do-it"] --> Discuss

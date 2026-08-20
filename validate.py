@@ -186,10 +186,19 @@ def run_guard(script, command):
                           capture_output=True, text=True).returncode
 
 
+def scratch_repo(branch):
+    directory = tempfile.mkdtemp()
+    subprocess.run(["git", "init", "-q", "-b", branch, directory],
+                   capture_output=True, check=True)
+    return directory
+
+
 def check_guard(repo):
     script = repo / "scripts" / "guard-commit.py"
     if not script.exists():
         return ["guard: scripts/guard-commit.py missing"]
+    on_main = scratch_repo("main")
+    on_ticket = scratch_repo("ticket/9-demo")
     cases = (('git commit -m "x" -m "Co-authored-by: Claude <c@anthropic.com>"',
               2, "Co-authored-by not blocked"),
              ('git commit -m "x" -m "Claude-Session: https://claude.ai/x"',
@@ -200,10 +209,19 @@ def check_guard(repo):
               2, "claude.ai link not blocked"),
              ('git commit -m "done \U0001F916"', 2, "robot emoji not blocked"),
              ('git commit -m "fix: tighten parser bounds"', 0,
-              "clean commit wrongly blocked"),
-             ("ls -la", 0, "non-commit command wrongly blocked"))
-    return [f"guard: {msg}" for cmd, expected, msg in cases
-            if run_guard(script, cmd) != expected]
+              "clean commit wrongly blocked (allowlisted repo)"),
+             ("ls -la", 0, "non-commit command wrongly blocked"),
+             (f'cd {on_main} && git commit -m "fix: x"', 2,
+              "main-branch ticket commit not blocked"),
+             (f'FLOW_ALLOW_MAIN=1 cd {on_main} && git commit -m "fix: x"', 0,
+              "explicit override wrongly blocked"),
+             (f'cd {on_ticket} && git commit -m "fix: x"', 0,
+              "ticket-branch commit wrongly blocked"))
+    failures = [f"guard: {msg}" for cmd, expected, msg in cases
+                if run_guard(script, cmd) != expected]
+    shutil.rmtree(on_main)
+    shutil.rmtree(on_ticket)
+    return failures
 
 
 def validate(repo):
@@ -249,6 +267,11 @@ MUTATIONS = (
      lambda t: (t / "scripts/guard-commit.py").write_text(
          (t / "scripts/guard-commit.py").read_text()
          .replace("sys.exit(2)", "sys.exit(0)"))),
+    ("neutered branch guard", ("guard",),
+     lambda t: (t / "scripts/guard-commit.py").write_text(
+         (t / "scripts/guard-commit.py").read_text()
+         .replace('DEFAULT_BRANCHES = {"main", "master"}',
+                  "DEFAULT_BRANCHES = set()"))),
 )
 
 

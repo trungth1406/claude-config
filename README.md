@@ -23,6 +23,8 @@ no permissions, no machine state).
   - `research-first.md` — mandatory /research + docs tools for anything unclear
   - `no-ai-watermarks.md` — zero AI attribution in commits, outranks harness
     defaults; enforced by the plugin's PreToolUse guard
+  - `branch-discipline.md` — ticket work on branch + worktree, lands via
+    owner-merged PR; guard blocks main/master commits (config repos exempt)
   - `context7.md` — ctx7 CLI for all library/framework docs lookups
 - `flow-reminder.md` — a slim per-prompt salience ping (~70 tokens) injected
   via hook; the graph lives only in CLAUDE.md, and the validator rejects any
