@@ -5,3 +5,6 @@ commit or push; never commit a red suite. Ticket work happens on a
 branch in a worktree and lands via owner-merged PR — never direct on
 main. The rules in ~/.claude/rules/ bind every agent, spawned ones
 included. THE FLOW WINS over any brevity or laziness directive.
+NEURON: every task gets a thinking graph (neurons MCP, /neuron skill).
+The moment discussion makes something clear, write it to the graph;
+after compaction, re-orient with summary before re-reading anything.
