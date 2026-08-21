@@ -17,7 +17,12 @@ existing local copies.
    advisory, not a gate: the files above are already installed either way.
    If it reports missing skills, tell the user to run
    /setup-matt-pocock-skills for the baseline and list what else is missing.
-4. Inspect ~/.claude/settings.json for a legacy manual UserPromptSubmit hook
+4. Install or update the neurons layer: run
+   bash "${CLAUDE_PLUGIN_ROOT}/scripts/install-neurons.sh" and report its
+   output. It pulls the latest neurons release binary (platform-aware),
+   installs it, and registers the MCP server if absent - idempotent, and
+   it skips gracefully when gh or claude are unavailable.
+5. Inspect ~/.claude/settings.json for a legacy manual UserPromptSubmit hook
    that cats a flow-reminder file. If present, warn: the plugin hook now
    injects the reminder, so every prompt is being double-injected. Recommend
    removing the manual hook, but do not edit settings.json without the
