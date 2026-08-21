@@ -22,7 +22,10 @@ existing local copies.
    output. It pulls the latest neurons release binary (platform-aware),
    installs it, and registers the MCP server if absent - idempotent, and
    it skips gracefully when gh or claude are unavailable.
-5. Inspect ~/.claude/settings.json for a legacy manual UserPromptSubmit hook
+5. After all files and the neurons binary are installed, tell the user:
+   "Run /reload-plugins now to pick up the changes in this session
+   (or restart Claude Code). New sessions auto-load on start."
+6. Inspect ~/.claude/settings.json for a legacy manual UserPromptSubmit hook
    that cats a flow-reminder file. If present, warn: the plugin hook now
    injects the reminder, so every prompt is being double-injected. Recommend
    removing the manual hook, but do not edit settings.json without the

@@ -16,12 +16,17 @@ Thinking survives compaction as graphs. Notes die with context; shape does not.
 - Plan to ~5 only where knowledge is settled; stop early at a genuine open
   question — a question node terminates lookahead, discussion grows past it.
 
-## Update — the moment something is clear
+## Update — actively, throughout work
 
+Agents must write to the graph during work, not just at establishment:
+- Decision made → `add_node` (kind: decision) + `link` to what raised it.
+- File created or API shaped → `set_stage` on the task node.
 - Confirmed → `reinforce` (or repeat the same link).
 - Corrected → add the replacement, `supersede` the old. Never delete.
-- New thought → `add_node` + `link` to what raised it.
+- Lesson learned → `add_node` (kind: knowledge) + `link`.
 - Not now, not wrong → `park`; `unpark` wakes it.
+
+A thin graph means an agent silently worked. That is a failure.
 
 ## Bind agents to the Flow
 
