@@ -1,47 +1,45 @@
 #!/usr/bin/env bash
-# Install or update the neurons MCP binary from its GitHub release and
-# register it with Claude Code. Idempotent; safe to run on every sync.
 set -euo pipefail
 
 REPO="trungth1406/neurons"
 BIN_DIR="${NEURON_BIN_DIR:-$HOME/.cargo/bin}"
-BIN="$BIN_DIR/neuron-mcp"
+API="https://api.github.com/repos/$REPO/releases/latest"
 
-if ! command -v gh >/dev/null 2>&1; then
-  echo "neurons: gh CLI not found - skipped (install gh and re-run /flow:sync)"
-  exit 0
+case "$(uname -s)-$(uname -m)" in
+  Darwin-arm64)  TARGET="aarch64-apple-darwin" ;;
+  Linux-x86_64)  TARGET="x86_64-unknown-linux-gnu" ;;
+  *) echo "error: no prebuilt binary for $(uname -s)-$(uname -m); use: cargo install --git https://github.com/$REPO --locked"; exit 1 ;;
+esac
+
+echo "fetching latest release..."
+RELEASE_JSON=$(curl -fsSL "$API")
+DOWNLOAD_URL=$(echo "$RELEASE_JSON" | grep -o "https://[^\"]*neuron-mcp[^\"]*${TARGET}[^\"]*\.tar\.gz" | head -1 || true)
+if [ -z "$DOWNLOAD_URL" ]; then
+  echo "error: cannot find release asset for $TARGET"; exit 1
 fi
+TAG=$(echo "$RELEASE_JSON" | grep -o '"tag_name": *"[^"]*"' | head -1 | cut -d'"' -f4)
 
-latest=$(gh release view --repo "$REPO" --json tagName -q .tagName 2>/dev/null) || {
-  echo "neurons: cannot read releases of $REPO (gh auth?) - skipped"
-  exit 0
-}
-current="v$("$BIN" --version 2>/dev/null | awk '{print $2}')" || current="none"
-
-if [ "$current" = "$latest" ]; then
-  echo "neurons: binary already current ($latest)"
+CURRENT=$("$BIN_DIR/neuron-mcp" --version 2>/dev/null | awk '{print $2}') || CURRENT="none"
+if [ "v$CURRENT" = "$TAG" ]; then
+  echo "neuron-mcp already at $TAG"
 else
-  case "$(uname -s)-$(uname -m)" in
-    Darwin-arm64)  target="aarch64-apple-darwin" ;;
-    Linux-x86_64)  target="x86_64-unknown-linux-gnu" ;;
-    *) echo "neurons: no prebuilt binary for $(uname -s)-$(uname -m) - use cargo install --git https://github.com/$REPO"; exit 0 ;;
-  esac
-  tmp=$(mktemp -d)
-  trap 'rm -rf "$tmp"' EXIT
-  gh release download "$latest" --repo "$REPO" -p "*$target*" -D "$tmp"
-  tar -xzf "$tmp"/neuron-mcp-*.tar.gz -C "$tmp"
+  TMP=$(mktemp -d)
+  trap 'rm -rf "$TMP"' EXIT
+  echo "downloading neuron-mcp $TAG for $TARGET..."
+  curl -fsSL -o "$TMP/neuron-mcp.tar.gz" "$DOWNLOAD_URL"
+  tar -xzf "$TMP/neuron-mcp.tar.gz" -C "$TMP"
   mkdir -p "$BIN_DIR"
-  mv -f "$tmp/neuron-mcp" "$BIN"
-  chmod +x "$BIN"
-  echo "neurons: installed $("$BIN" --version) ($current -> $latest)"
+  mv -f "$TMP/neuron-mcp" "$BIN_DIR/neuron-mcp"
+  chmod +x "$BIN_DIR/neuron-mcp"
+  echo "installed neuron-mcp $TAG"
 fi
 
 if command -v claude >/dev/null 2>&1; then
   if claude mcp list 2>/dev/null | grep -q "^neurons:"; then
-    echo "neurons: MCP already registered"
+    echo "MCP already registered"
   else
-    claude mcp add neurons -- "$BIN" >/dev/null && echo "neurons: MCP registered (restart sessions to load)"
+    claude mcp add neurons -- "$BIN_DIR/neuron-mcp" >/dev/null 2>&1 && echo "MCP registered (restart Claude Code sessions to load)"
   fi
 else
-  echo "neurons: claude CLI not on PATH - register manually: claude mcp add neurons -- $BIN"
+  echo "register manually: claude mcp add neurons -- $BIN_DIR/neuron-mcp"
 fi
