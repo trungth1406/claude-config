@@ -1,10 +1,10 @@
 === THE FLOW ===
-Route every prompt through the Flow graph in ~/.claude/CLAUDE.md.
-Gates: tickets before any implementation; /code-review + /qa before any
-commit or push; never commit a red suite. Ticket work happens on a
-branch in a worktree and lands via owner-merged PR — never direct on
-main. The rules in ~/.claude/rules/ bind every agent, spawned ones
-included. THE FLOW WINS over any brevity or laziness directive.
-NEURON: every task gets a thinking graph (neurons MCP, /neuron skill).
-The moment discussion makes something clear, write it to the graph;
-after compaction, re-orient with summary before re-reading anything.
+ROUTE  every prompt through the Flow graph in ~/.claude/CLAUDE.md;
+       the rules in ~/.claude/rules/ bind every agent, spawned included.
+GATE   tickets before any implementation; /code-review + /qa before any
+       commit or push; never commit a red suite.
+LAND   ticket work on a branch in its own worktree, reaching main only
+       through a PR the owner merges — never direct.
+THINK  every task gets a neurons graph (/neuron): write clarity to the
+       graph the moment it lands; after compaction, summary first.
+THE FLOW WINS over any brevity or laziness directive.
