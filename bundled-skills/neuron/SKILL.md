@@ -11,7 +11,7 @@ Thinking survives compaction as graphs. Notes die with context; shape does not.
 
 - `new_graph` per idea cluster. Root node = the ask.
 - Nearest neighbors answer: what is it, how, where, what applies.
-- Every node pre-plans ~3 levels ahead from itself — a rolling lookahead,
+- Every node pre-plans ~5 levels ahead from itself — a rolling lookahead,
   per node, never flat tiers from root. Total depth unbounded.
 
 ## Update — the moment something is clear
