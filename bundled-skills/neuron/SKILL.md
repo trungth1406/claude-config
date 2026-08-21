@@ -13,6 +13,8 @@ Thinking survives compaction as graphs. Notes die with context; shape does not.
 - Nearest neighbors answer: what is it, how, where, what applies.
 - Every node pre-plans ~5 levels ahead from itself — a rolling lookahead,
   per node, never flat tiers from root. Total depth unbounded.
+- Plan to ~5 only where knowledge is settled; stop early at a genuine open
+  question — a question node terminates lookahead, discussion grows past it.
 
 ## Update — the moment something is clear
 
