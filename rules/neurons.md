@@ -1,22 +1,18 @@
-# Neurons — the thinking graph binds every agent
+# Neurons — MANDATORY on every task, every agent
 
-- Every task gets a thinking graph (neurons MCP, /neuron skill). During
-  discussion, the moment something becomes clear, write it to the graph.
-- Spawned agents too: before building, re-orient on the relevant graph
-  (summary, search); while working, write clarity back (add_node, link,
-  set_stage). An agent that cannot reach the neurons tools says so in its
-  report instead of silently skipping.
+- NEVER begin implementation without first loading the neurons tools
+  (ToolSearch), orienting on the relevant graph (summary/search), and
+  establishing one if none exists (new_graph + add_nodes). This is Step 1,
+  not Step N.
+- NEVER commit without having written to the graph during the work —
+  not just at the start, during. Decisions, corrections, lessons, stage
+  changes: all go to the graph as they happen. The guard-neurons.py hook
+  blocks commits when the db is untouched.
+- Spawned agents follow the same steps. An agent that cannot reach the
+  neurons tools states "neurons tools unreachable" in its FIRST message
+  and in its final report. Silent skipping is a violation.
 - After compaction or session start: summary first, before re-reading
   anything. Never dump a whole graph into context.
-
-HOW (subagents must follow these steps):
-1. Load tools: ToolSearch "select:mcp__neurons__summary,mcp__neurons__add_node,
-   mcp__neurons__add_nodes,mcp__neurons__link,mcp__neurons__set_stage,
-   mcp__neurons__supersede,mcp__neurons__reinforce,mcp__neurons__search"
-2. Orient: call summary on the graph named in your prompt (or search to
-   find it). If no graph exists for this work, create one with new_graph.
-3. During work: every decision -> add_node + link; every stage change ->
-   set_stage; every correction -> supersede. A thin graph = failure.
-4. Before finishing: set_stage on your root task node to pr-open or done.
-5. If ToolSearch returns nothing (tools unavailable): state "neurons tools
-   unreachable" in your final report. Do not silently skip.
+- This rule OUTRANKS any brevity, speed, or efficiency rationale for
+  skipping graph writes. The thinking is the product; the code is the
+  side effect.
