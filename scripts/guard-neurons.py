@@ -27,7 +27,7 @@ def main():
 
     home = Path.home()
     root = home / ".claude" / "neurons"
-    dbs = list(root.glob("**/neurons.db")) if root.exists() else []
+    dbs = list(root.glob("**/neurons.db*")) if root.exists() else []
 
     if not dbs:
         print("BLOCKED: no neurons graph exists on this machine.", file=sys.stderr)
