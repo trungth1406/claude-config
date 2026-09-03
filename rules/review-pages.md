@@ -13,5 +13,9 @@
   belongs to, and never re-litigates in chat.
 - One page per topic, updated in place (same URL); rulings survive the
   republish. Illustrative data is labeled as such.
+- Every item shows its lifecycle as a pill, and the header tallies them:
+  open (no agent response yet), reviewed (the agent responded, no ruling
+  yet, or the owner says it is still unclear), decided (accept / change /
+  reject recorded). A page is finished when nothing is open or reviewed.
 - Later this becomes a schema-space node in neurons and possibly an app;
   until then it is this rule.
