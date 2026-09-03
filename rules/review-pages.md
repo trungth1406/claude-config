@@ -17,5 +17,11 @@
   open (no agent response yet), reviewed (the agent responded, no ruling
   yet, or the owner says it is still unclear), decided (accept / change /
   reject recorded). A page is finished when nothing is open or reviewed.
+- A reject or change that carries a comment means the owner did not
+  understand the proposal, not that it is refused. The proposal stays, the
+  agent adds more drawn examples with new data under the item, the item
+  goes back to reviewed, and the owner re-rules. Only a bare reject or
+  change (empty comment) is a decision. Never file tickets or change plans
+  on an unclear ruling.
 - Later this becomes a schema-space node in neurons and possibly an app;
   until then it is this rule.
